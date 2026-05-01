@@ -1,0 +1,26 @@
+# Dataset
+data/
+
+# Environments
+.venv/
+env/
+venv/
+
+# Model Checkpoints and Logs
+checkpoints/
+*.pth
+*.pt
+runs/
+logs/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS Specific
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/
