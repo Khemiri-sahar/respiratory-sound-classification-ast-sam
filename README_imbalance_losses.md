@@ -36,6 +36,50 @@ python evaluate.py --model_path ./checkpoints/debug_imbalance.pth --limit_batche
 
 This only checks that the code runs.
 
+## Method Descriptions
+
+### Weighted Cross-Entropy
+
+Weighted Cross-Entropy gives more importance to rare classes during loss calculation. Each class receives a weight based on its frequency, so mistakes on rare classes such as Wheeze and Both are penalized more than mistakes on frequent classes. This method is useful when the model tends to favor the majority class.
+
+Recommended first test:
+
+```powershell
+python train.py --loss weighted_ce --sampler none --run_name weighted_ce
+```
+
+### Focal Loss
+
+Focal Loss focuses training on hard examples. Easy, confident predictions contribute less to the loss, while difficult or misclassified samples contribute more. The `gamma` value controls how strong this focusing effect is. Higher gamma values give more attention to hard samples.
+
+Recommended gamma values:
+
+```text
+0.5, 1.0, 2.0
+```
+
+### F-beta Loss
+
+F-beta Loss is used to emphasize recall. With `beta=2`, recall is more important than precision, which is useful when false negatives are costly. In this project, it can be applied mainly to abnormal classes using `--fbeta_abnormal_only`.
+
+Recommended command:
+
+```powershell
+python train.py --loss fbeta --fbeta_beta 2 --fbeta_abnormal_only --sampler none --run_name fbeta2
+```
+
+### Oversampling
+
+Oversampling changes how training samples are selected. Instead of changing the loss, it makes rare classes appear more often during training. The `weighted` sampler balances all classes using inverse frequency, while the `minority` sampler focuses especially on Wheeze and Both.
+
+### Threshold Tuning
+
+Threshold tuning is applied after training during evaluation. It changes the decision rule used to convert class probabilities into predicted labels. This can improve sensitivity by making the model less conservative when detecting abnormal classes. Threshold tuning should be reported carefully, especially if thresholds are selected using the test set.
+
+### False-Negative Analysis
+
+False-negative analysis identifies abnormal respiratory cycles that were predicted as Normal. These cases are important because they directly reduce sensitivity. The evaluation script saves these samples in `false_negatives_abnormal_as_normal.csv` for later inspection.
+
 ## Training Options
 
 ### Loss Options
