@@ -27,7 +27,7 @@ from tqdm import tqdm
 
 DATA_DIR        = "./data/ICBHI_final_database"
 SPLIT_FILE      = "./data/ICBHI_Challenge_train_test.txt"
-OUTPUT_NPZ      = "./data/icbhi_preprocessed.npz"
+OUTPUT_NPZ      = "./data/icbhi_ast_16k_8s_metadata.npz"
 
 TARGET_SR       = 16_000
 TARGET_DURATION = 8                             
@@ -239,7 +239,8 @@ def process_data(cfg: argparse.Namespace):
         out_path += ".npz"
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
 
-    np.savez_compressed(
+    # Use uncompressed save to avoid corruption during write
+    np.savez(
         out_path,
         X_train=X_train,   mel_train=mel_train,   y_train=y_train,   device_train=device_train,
         X_test=X_test,     mel_test=mel_test,      y_test=y_test,     device_test=device_test,
