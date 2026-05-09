@@ -106,13 +106,19 @@ def train(args):
         ASTDataset(X_train, y_train, d_train, processor, train=True), 
         batch_size=args.batch_size, 
         sampler=sampler,
-        num_workers=0
+        num_workers=4,
+        pin_memory=True,
+        prefetch_factor=2,
+        persistent_workers=True
     )
     test_loader = DataLoader(
         ASTDataset(X_test, y_test, d_test, processor, train=False), 
         batch_size=args.batch_size, 
         shuffle=False,
-        num_workers=0
+        num_workers=4,
+        pin_memory=True,
+        prefetch_factor=2,
+        persistent_workers=True
     )
 
     # ========== Initialize Model ==========
@@ -214,7 +220,7 @@ def train(args):
 
             if args.use_amp and DEVICE.type == 'cuda':
                 # ===== Mixed-precision training (FP16) =====
-                with torch.cuda.amp.autocast():
+                with torch.amp.autocast('cuda'):
                     logits = model(inputs)
                     loss = criterion(logits, labels)
                 
@@ -225,7 +231,7 @@ def train(args):
                     optimizer.first_step(zero_grad=True)
                     
                     # Second forward pass at perturbed weights
-                    with torch.cuda.amp.autocast():
+                    with torch.amp.autocast('cuda'):
                         criterion(model(inputs), labels).backward()
                     
                     # Now unscale and apply second step

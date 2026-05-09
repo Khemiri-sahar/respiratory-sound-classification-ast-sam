@@ -38,13 +38,8 @@ cd /path/to/respiratory-sound-classification-ast-sam
 ```bash
 # Using venv
 python -m venv venv
-source venv/bin/activate          # On Linux/macOS
 venv\Scripts\activate             # On Windows
 
-# OR using conda
-conda create -n ast-sam python=3.10
-conda activate ast-sam
-```
 
 ### Step 3: Install Dependencies
 ```bash
