@@ -70,9 +70,9 @@ def train(args):
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     print(f"\n{'='*80}")
-    print(f"🚀 AST + SAM TRAINING - ICBHI 2017 Respiratory Sound Classification")
+    print(f" AST + SAM TRAINING - ICBHI 2017 Respiratory Sound Classification")
     print(f"{'='*80}")
-    print(f"⚙️  Device: {DEVICE}")
+    print(f"  Device: {DEVICE}")
     print(f"   Compute: GPU with Mixed-Precision (FP16)" if args.use_amp and DEVICE.type == 'cuda' 
           else f"   Compute: CPU (FP32)")
     print(f"   Optimizer: {'SAM (Sharpness-Aware Minimization, rho={:.4f})'.format(args.rho) if args.use_sam else 'AdamW'}")
@@ -83,7 +83,7 @@ def train(args):
     os.makedirs(args.checkpoint_dir, exist_ok=True)
     
     # ========== Load Data ==========
-    print(f"📥 Loading preprocessed data: {args.data_path}")
+    print(f" Loading preprocessed data: {args.data_path}")
     if not os.path.exists(args.data_path):
         raise FileNotFoundError(f"Data file not found: {args.data_path}\nRun preprocess.py first.")
 
@@ -106,23 +106,19 @@ def train(args):
         ASTDataset(X_train, y_train, d_train, processor, train=True), 
         batch_size=args.batch_size, 
         sampler=sampler,
-        num_workers=4,
-        pin_memory=True,
-        prefetch_factor=2,
-        persistent_workers=True
+        num_workers=0,
+        pin_memory=True
     )
     test_loader = DataLoader(
         ASTDataset(X_test, y_test, d_test, processor, train=False), 
         batch_size=args.batch_size, 
         shuffle=False,
-        num_workers=4,
-        pin_memory=True,
-        prefetch_factor=2,
-        persistent_workers=True
+        num_workers=0,
+        pin_memory=True
     )
 
     # ========== Initialize Model ==========
-    print("\n🧠 Initializing model...")
+    print("\n Initializing model...")
     model = CustomAST(num_classes=4).to(DEVICE)
     total_params = sum(p.numel() for p in model.parameters())
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -140,7 +136,7 @@ def train(args):
             args.resume_from = os.path.join(args.checkpoint_dir, "best_model.pth")
         
         if os.path.exists(args.resume_from):
-            print(f"\n🔄 RESUME MODE: Loading checkpoint from {args.resume_from}")
+            print(f"\n RESUME MODE: Loading checkpoint from {args.resume_from}")
             model.load_state_dict(torch.load(args.resume_from, map_location=DEVICE))
             print(f"   ✓ Model loaded successfully")
             total_epochs = args.epochs + args.resume_epochs
@@ -176,7 +172,7 @@ def train(args):
     criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
     scaler = torch.cuda.amp.GradScaler() if args.use_amp and DEVICE.type == 'cuda' else None
     
-    print(f"\n📊 Optimizer: {optim_name}")
+    print(f"\n Optimizer: {optim_name}")
     print(f"   Loss function: CrossEntropyLoss (label_smoothing=0.1)")
     print(f"   LR scheduler: None")
     
@@ -203,7 +199,7 @@ def train(args):
     print(f"\n{'='*80}")
     print(f"Starting training with {optim_name}...")
     if args.resume_epochs > 0:
-        print(f"🔄 Resuming: epochs {start_epoch+1}-{total_epochs} (adding {args.resume_epochs} epochs)")
+        print(f" Resuming: epochs {start_epoch+1}-{total_epochs} (adding {args.resume_epochs} epochs)")
     print(f"{'='*80}\n")
     
     # ========== Training Loop ==========
@@ -304,11 +300,11 @@ def train(args):
             best_epoch = epoch + 1
             save_path = os.path.join(args.checkpoint_dir, "best_model.pth")
             torch.save(model.state_dict(), save_path)
-            print(f"             ✅ Best model saved (Score: {score*100:.2f}%)")
+            print(f"              Best model saved (Score: {score*100:.2f}%)")
 
     # ========== Final Summary ==========
     print(f"\n{'='*80}")
-    print(f"🏆 TRAINING COMPLETE")
+    print(f" TRAINING COMPLETE")
     print(f"{'='*80}")
     print(f"Best Epoch: {best_epoch}")
     print(f"Best Score: {best_score*100:.2f}%")
@@ -320,13 +316,13 @@ def train(args):
     print(f"      • Crackle: {best_metrics['Crackle']*100:.2f}%")
     print(f"      • Wheeze:  {best_metrics['Wheeze']*100:.2f}%")
     print(f"      • Both:    {best_metrics['Both']*100:.2f}%")
-    print(f"\n📁 Model saved: {os.path.join(args.checkpoint_dir, 'best_model.pth')}")
+    print(f"\n Model saved: {os.path.join(args.checkpoint_dir, 'best_model.pth')}")
     
     # Save training history
     history_path = os.path.join(args.checkpoint_dir, "training_history.json")
     with open(history_path, 'w') as f:
         json.dump(history, f, indent=2)
-    print(f"📊 History saved: {history_path}")
+    print(f" History saved: {history_path}")
     print(f"{'='*80}\n")
 
 
